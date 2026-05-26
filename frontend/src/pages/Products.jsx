@@ -8,9 +8,7 @@ import {
   Trash2, 
   AlertTriangle, 
   X, 
-  FolderPlus,
-  RefreshCw,
-  Info
+  RefreshCw
 } from 'lucide-react';
 
 export default function Products() {
@@ -26,8 +24,14 @@ export default function Products() {
 
   const showNotification = (message, type = 'info') => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 4500);
   };
+
+  // Automatically clear notifications safely
+  useEffect(() => {
+    if (!notification) return;
+    const timer = setTimeout(() => setNotification(null), 4500);
+    return () => clearTimeout(timer);
+  }, [notification]);
 
   // Search/Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,7 +57,7 @@ export default function Products() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [prodRes, catRes, supRes] = await axios.all([
+      const [prodRes, catRes, supRes] = await Promise.all([
         axios.get('/api/products'),
         axios.get('/api/categories'),
         axios.get('/api/suppliers')
@@ -168,20 +172,20 @@ export default function Products() {
     const isLow = Number(prod.stock) <= Number(prod.minStockAlert);
     if (prod.stock === 0) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#ef4444]/15 text-[#fca5a5] border border-[#ef4444]/20 text-[10px] font-bold uppercase tracking-wider">
-          <AlertTriangle className="w-3 h-3 text-[#f87171]" /> Out of stock
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-red-500/15 text-red-300 border border-red-500/20 text-[10px] font-bold uppercase tracking-wider">
+          <AlertTriangle className="w-3 h-3 text-red-400" /> Out of stock
         </span>
       );
     }
     if (isLow) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#f59e0b]/15 text-[#fde047] border border-[#f59e0b]/20 text-[10px] font-bold uppercase tracking-wider">
-          <AlertTriangle className="w-3 h-3 text-[#facc15]" /> Low Stock ({prod.stock})
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/15 text-yellow-300 border border-amber-500/20 text-[10px] font-bold uppercase tracking-wider">
+          <AlertTriangle className="w-3 h-3 text-yellow-400" /> Low Stock ({prod.stock})
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2.5 py-1 rounded bg-[#10b981]/15 text-[#86efac] border border-[#10b981]/20 text-[10px] font-bold uppercase tracking-wider">
+      <span className="inline-flex items-center px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wider">
         Normal ({prod.stock})
       </span>
     );
@@ -191,13 +195,13 @@ export default function Products() {
   const canDelete = user && ['admin', 'manager'].includes(user.role);
 
   return (
-    <div className="space-y-6 animate-fade-in text-slate-100">
+    <div className="space-y-6 text-slate-100">
       {/* Floating notifications panel */}
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl backdrop-blur-xl border shadow-2xl animate-fade-in flex items-center gap-3 ${
-          notification.type === 'error' ? 'bg-red-500/15 border-red-500/30 text-red-350' :
-          notification.type === 'success' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-350' :
-          'bg-blue-500/15 border-blue-500/30 text-blue-350'
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl backdrop-blur-xl border shadow-2xl flex items-center gap-3 ${
+          notification.type === 'error' ? 'bg-red-500/15 border-red-500/30 text-red-400' :
+          notification.type === 'success' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' :
+          'bg-blue-500/15 border-blue-500/30 text-blue-400'
         }`}>
           <div className="text-xs font-semibold">{notification.message}</div>
           <button onClick={() => setNotification(null)} className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white cursor-pointer">
@@ -215,7 +219,7 @@ export default function Products() {
         {canModify && (
           <button
             onClick={handleOpenCreateModal}
-            className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-blue-650 to-blue-550 hover:from-blue-600 hover:to-blue-500 text-white px-4 py-2.5 rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.2)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.4)] transition cursor-pointer"
+            className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-4 py-2.5 rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.2)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.4)] transition cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Add Product SKU
           </button>
@@ -233,7 +237,7 @@ export default function Products() {
             placeholder="Search by name or SKU..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 border border-white/10 rounded-lg text-xs bg-white/5 text-white placeholder-slate-450 focus:outline-none focus:border-blue-500 focus:bg-white/10 transition font-medium"
+            className="w-full pl-9 pr-3 py-2 border border-white/10 rounded-lg text-xs bg-white/5 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white/10 transition font-medium"
           />
         </div>
 
@@ -244,7 +248,7 @@ export default function Products() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="py-1.5 px-3 border border-white/10 bg-slate-900 rounded-lg text-xs leading-none font-semibold text-slate-200 focus:outline-none focus:bg-slate-850 cursor-pointer"
+              className="py-1.5 px-3 border border-white/10 bg-slate-900 rounded-lg text-xs leading-none font-semibold text-slate-200 focus:outline-none focus:bg-slate-800 cursor-pointer"
             >
               <option value="all">All Categories</option>
               {categories.map(c => (
@@ -259,7 +263,7 @@ export default function Products() {
             <select
               value={stockFilter}
               onChange={(e) => setStockFilter(e.target.value)}
-              className="py-1.5 px-3 border border-white/10 bg-slate-900 rounded-lg text-xs leading-none font-semibold text-slate-200 focus:outline-none focus:bg-slate-850 cursor-pointer"
+              className="py-1.5 px-3 border border-white/10 bg-slate-900 rounded-lg text-xs leading-none font-semibold text-slate-200 focus:outline-none focus:bg-slate-800 cursor-pointer"
             >
               <option value="all">Display All Stock</option>
               <option value="low">Under Supply Warning</option>
@@ -267,6 +271,13 @@ export default function Products() {
           </div>
         </div>
       </div>
+
+      {/* Error Message Panel */}
+      {error && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium">
+          {error}
+        </div>
+      )}
 
       {/* Main Stock Table */}
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg overflow-hidden">
@@ -344,7 +355,7 @@ export default function Products() {
 
       {/* CRUD Creation & Update Modal drawer */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-slate-950/65 backdrop-blur-sm p-4 animate-fade-in text-slate-200">
+        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-slate-950/65 backdrop-blur-sm p-4 text-slate-200">
           <div className="bg-slate-900 border border-white/15 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-white uppercase tracking-wide">
@@ -368,7 +379,7 @@ export default function Products() {
                     required
                     value={formData.sku}
                     onChange={handleInputChange}
-                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg font-mono focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-550 transition font-medium"
+                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg font-mono focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-500 transition font-medium"
                   />
                 </div>
 
@@ -381,7 +392,7 @@ export default function Products() {
                     placeholder="e.g. Grinding Drill XL"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-550 transition font-medium"
+                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-500 transition font-medium"
                   />
                 </div>
               </div>
@@ -393,8 +404,9 @@ export default function Products() {
                     name="categoryId"
                     value={formData.categoryId}
                     onChange={handleInputChange}
-                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-slate-900 text-white focus:bg-slate-850 focus:border-blue-550 transition cursor-pointer font-medium"
+                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-slate-900 text-white focus:bg-slate-800 focus:border-blue-500 transition cursor-pointer font-medium"
                   >
+                    <option value="" disabled>Select Category</option>
                     {categories.map(c => (
                       <option key={c._id} value={c._id}>{c.name}</option>
                     ))}
@@ -407,8 +419,9 @@ export default function Products() {
                     name="supplierId"
                     value={formData.supplierId}
                     onChange={handleInputChange}
-                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-slate-900 text-white focus:bg-slate-850 focus:border-blue-550 transition cursor-pointer font-medium"
+                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-slate-900 text-white focus:bg-slate-800 focus:border-blue-500 transition cursor-pointer font-medium"
                   >
+                    <option value="" disabled>Select Supplier</option>
                     {suppliers.map(s => (
                       <option key={s._id} value={s._id}>{s.name}</option>
                     ))}
@@ -426,7 +439,7 @@ export default function Products() {
                     placeholder="350"
                     value={formData.price}
                     onChange={handleInputChange}
-                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-550 transition font-medium"
+                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-500 transition font-medium"
                   />
                 </div>
 
@@ -439,7 +452,7 @@ export default function Products() {
                     placeholder="180"
                     value={formData.cost}
                     onChange={handleInputChange}
-                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-550 transition font-medium"
+                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-500 transition font-medium"
                   />
                 </div>
               </div>
@@ -454,7 +467,7 @@ export default function Products() {
                     placeholder="15"
                     value={formData.stock}
                     onChange={handleInputChange}
-                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-550 transition font-medium"
+                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-500 transition font-medium"
                   />
                 </div>
 
@@ -467,7 +480,7 @@ export default function Products() {
                     placeholder="5"
                     value={formData.minStockAlert}
                     onChange={handleInputChange}
-                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-550 transition font-medium"
+                    className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-500 transition font-medium"
                   />
                 </div>
               </div>
@@ -480,7 +493,7 @@ export default function Products() {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows="3"
-                  className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-550 transition resize-none font-medium"
+                  className="w-full text-xs border border-white/10 p-2.5 rounded-lg focus:outline-none bg-white/5 text-white focus:bg-white/10 focus:border-blue-500 transition resize-none font-medium"
                 />
               </div>
 
@@ -494,7 +507,7 @@ export default function Products() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-gradient-to-r from-blue-650 to-blue-550 hover:from-blue-600 hover:to-blue-500 text-white font-bold rounded-lg text-xs leading-none transition cursor-pointer"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-lg text-xs leading-none transition cursor-pointer"
                 >
                   Save Record
                 </button>
