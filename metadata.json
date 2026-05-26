@@ -1,0 +1,6 @@
+{
+  "name": "Business Management System",
+  "description": "Full-stack web-based business management system for DAB Enterprise Ltd, featuring inventory tracking, sales processing, customer and supplier relationships, employee workflows, and detailed reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
