@@ -3,12 +3,12 @@ import path from 'path';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-// Load environmental parameters
+
 dotenv.config();
 
-// Initialize Express app
+
 const app = express();
-const PORT = 3000; // Hardcoded container ingress port
+const PORT = 3000; 
 
 // Middlewares
 app.use(cors());
